@@ -1,0 +1,94 @@
+#include <WiFi.h>
+#include <WiFiClientSecure.h>
+#include <HTTPClient.h>
+#include <HTTPUpdate.h>
+
+const char* ssid = "Er.Aayush Chourasia";
+const char* password = "8852035416";
+
+// GitHub RAW firmware link
+String firmwareURL =
+"https://github.com/ErAayushChourasia/esp32-OTA/releases/download/esp32-OTA/firmware.bin";
+
+// LED Pins
+const int led1 = 2;
+const int led2 = 4;
+
+unsigned long previousMillis = 0;
+const long interval = 10000;
+
+void setup() {
+
+  Serial.begin(115200);
+
+  pinMode(led1, OUTPUT);
+  pinMode(led2, OUTPUT);
+
+  WiFi.begin(ssid, password);
+
+  Serial.print("Connecting WiFi");
+
+  while (WiFi.status() != WL_CONNECTED) {
+
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("\nWiFi Connected");
+}
+
+void loop() {
+
+  // Alternate LED Blink
+  static bool state = false;
+
+  if (millis() - previousMillis >= interval) {
+
+    previousMillis = millis();
+
+    state = !state;
+
+    digitalWrite(led1, state);
+    digitalWrite(led2, !state);
+  }
+
+  // OTA Check Every 30 Seconds
+  static unsigned long otaTimer = 0;
+
+  if (millis() - otaTimer > 30000) {
+
+    otaTimer = millis();
+
+    Serial.println("Checking for OTA Update...");
+
+    WiFiClientSecure client;
+
+    client.setInsecure();
+
+    t_httpUpdate_return ret =
+      httpUpdate.update(client, firmwareURL);
+
+    switch (ret) {
+
+      case HTTP_UPDATE_FAILED:
+
+        Serial.printf("Update Failed Error (%d): %s\n",
+                      httpUpdate.getLastError(),
+                      httpUpdate.getLastErrorString().c_str());
+
+        break;
+
+      case HTTP_UPDATE_NO_UPDATES:
+
+        Serial.println("No Update Available");
+
+        break;
+
+      case HTTP_UPDATE_OK:
+
+        Serial.println("Update Successful");
+
+        break;
+    }
+  }
+}
