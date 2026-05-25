@@ -6,9 +6,9 @@
 const char* ssid = "Er.Aayush Chourasia";
 const char* password = "8852035416";
 
-// GitHub RAW firmware link
+// RAW GitHub BIN link
 String firmwareURL =
-"http://raw.githubusercontent.com/ErAayushChourasia/esp32-OTA/refs/heads/main/firmware.bin";
+"http://raw.githubusercontent.com/ErAayushChourasia/esp32-OTA/main/firmware.bin";
 
 // LED Pins
 const int led1 = 2;
@@ -39,7 +39,7 @@ void setup() {
 
 void loop() {
 
-  // Alternate LED Blink
+  // LED Blink
   static bool state = false;
 
   if (millis() - previousMillis >= interval) {
@@ -52,7 +52,7 @@ void loop() {
     digitalWrite(led2, !state);
   }
 
-  // OTA Check Every 30 Seconds
+  // OTA Check
   static unsigned long otaTimer = 0;
 
   if (millis() - otaTimer > 30000) {
@@ -87,6 +87,7 @@ void loop() {
       case HTTP_UPDATE_OK:
 
         Serial.println("Update Successful");
+        Serial.println("Restarting...");
 
         break;
     }
